@@ -1,0 +1,14 @@
+syntax = "proto3" ;// 声明protobuf的版本
+
+package fixbug; // 声明代码所在的包 ，类似namespace
+
+message LoginRequest {
+    string name = 1;
+    string pwd = 2;
+}
+
+message LoginResponse {
+    int32 errcode = 1;
+    string errmsg = 2;
+    bool success = 3;
+}

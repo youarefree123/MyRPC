@@ -1,2 +1,19 @@
 # MyRPC
-Zookeeper + Muduo 
+
+Protobuf + Zookeeper + Muduo 
+# 第三方库安装
+## 安装Protobuf
+`https://github.com/protocolbuffers/protobuf/blob/main/src/README.md`
+
+## 安装Muduo
+`https://github.com/chenshuo/muduo`
+
+## 安装fmt + spdlog
+`https://github.com/gabime/spdlog`
+
+
+## 安装 Zookeeper
+`https://github.com/apache/zookeeper/blob/master/README_packaging.md`
+
+# Protobuf配置
+
