@@ -55,12 +55,13 @@ private:
 
 
 // spd 带行号的打印，同时输出console和文件
+// CRITICAL 异步日志模式下不能直接abort()
 #define TRACE(...) SPDLOG_LOGGER_TRACE(spdlog::default_logger_raw(), __VA_ARGS__);
 #define DEBUG(...) SPDLOG_LOGGER_DEBUG(spdlog::default_logger_raw(), __VA_ARGS__);
 #define INFO(...) SPDLOG_LOGGER_INFO(spdlog::default_logger_raw(), __VA_ARGS__);
 #define WARN(...) SPDLOG_LOGGER_WARN(spdlog::default_logger_raw(), __VA_ARGS__);
 #define ERROR(...) SPDLOG_LOGGER_ERROR(spdlog::default_logger_raw(), __VA_ARGS__);
-#define CRITICAL(...) SPDLOG_LOGGER_CRITICAL(spdlog::default_logger_raw(), __VA_ARGS__);abort();
+#define CRITICAL(...) SPDLOG_LOGGER_CRITICAL(spdlog::default_logger_raw(), __VA_ARGS__); spdlog::drop_all(); spdlog::shutdown(); abort();
 
 #define LOG_LEVEL_INFO spdlog::set_level(spdlog::level::info);
 #define LOG_LEVEL_DEBUG spdlog::set_level(spdlog::level::debug);
@@ -149,7 +150,7 @@ enum LogType {
     Critical
 };
 
-void set_log( PutType put_type, LogType log_type ) {
+void LogInit( PutType put_type, LogType log_type ) {
 
     switch ( put_type )
     {

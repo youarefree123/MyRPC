@@ -1,10 +1,11 @@
 #pragma once 
 
 #include "noncopyable.h"
-#include "log.h"
 #include <unordered_map>
 #include <string>
 #include <filesystem>
+#include <optional>
+#include <iostream> // fixbug 
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
@@ -13,29 +14,38 @@ namespace mrpc {
 
 class Config : public noncopyable {
 public:
-    void Init( const char* ini_path );
+    bool Init( const char* ini_path );
     void Format();
-
+    static Config& Instance() {
+        static Config conf;
+        return conf;
+    }
+    std::optional<std::string> Load( const char* ) ;
+    std::optional<std::string> Load( std::string&& );
 
 private:
+    Config() = default;
+    ~Config() = default;
     std::unordered_map<std::string, std::string> m_config;
 };
 
 
-void Config::Init( const char* ini_path ) {
+bool Config::Init( const char* ini_path ) {
   
     if (!std::filesystem::exists(ini_path)) {
-        CRITICAL( "{} not exists.", ini_path );
+        return false;
     }
 
     boost::property_tree::ptree root, tag;
     boost::property_tree::ini_parser::read_ini(ini_path, root);
     tag = root.get_child("config");
     
-    m_config[ "rpc_ip" ] = tag.get<std::string>( "rpc_ip" );
-    m_config[ "rpc_port" ] = tag.get<std::string>( "rpc_port" );
-    m_config[ "zk_ip" ] = tag.get<std::string>( "zk_ip" );
-    m_config[ "zk_port" ] = tag.get<std::string>( "zk_port" );
+    // 获取config下的每个键值对
+    for( const auto& it : tag ) {
+        m_config[ it.first ] = it.second.data();
+    }
+
+    return true;
     
 }
 
@@ -43,6 +53,17 @@ void Config::Format() {
     for( auto& [k,v] : m_config ) {
         std::cout<<k<<":"<<v<<std::endl;
     }
+}
+
+std::optional<std::string> Config::Load( const char* key ) {
+    return Load( std::string(key) );
+}
+
+std::optional<std::string> Config::Load( std::string&& key ) {
+    if( m_config.find( key ) != m_config.end() ) {
+        return m_config[ key ];
+    }
+    return std::nullopt;
 }
 
 
