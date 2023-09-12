@@ -1,7 +1,7 @@
 #include "log.h"
 
 int main() {
-    LogInit(PutType::Console, LogType::Trace);
+    LogInit(PutType::Console, LogType::TRACE);
     
 
     for( int i = 0; i < 5; i++ ) {

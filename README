@@ -16,4 +16,4 @@ Protobuf + Zookeeper + Muduo
 `https://github.com/apache/zookeeper/blob/master/README_packaging.md`
 
 # Protobuf配置
-
+`protoc xx.proto --cpp_out=./`

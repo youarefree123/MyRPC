@@ -45,6 +45,8 @@ bool Config::Init( const char* ini_path ) {
         m_config[ it.first ] = it.second.data();
     }
 
+    Format();
+
     return true;
     
 }

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package mrpc;
+
+option cc_generic_services = true;
+
+message ResultCode 
+{
+    int32 err_code = 1;
+    bytes err_msg = 2;
+}
+
+message EchoRequst
+{
+    bytes msg = 1;
+}
+
+message EchoResponse 
+{
+    ResultCode result_code = 1;
+    bytes echo_msg = 2;
+}
+
+
+message HelloRequst
+{
+    bytes name = 1;
+}
+
+message HelloResponse 
+{
+    ResultCode result_code = 1;
+    bytes hello_msg = 2;
+}
+
+service EchoService 
+{
+    rpc Echo( EchoRequst ) returns ( EchoResponse );
+    rpc Hello( HelloRequst ) returns ( HelloResponse );
+
+}

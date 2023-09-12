@@ -142,12 +142,12 @@ enum PutType {
 };
 
 enum LogType {
-    Trace = 0,
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Critical
+    TRACE = 0,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
+    CRITICAL
 };
 
 void LogInit( PutType put_type, LogType log_type ) {
@@ -165,23 +165,29 @@ void LogInit( PutType put_type, LogType log_type ) {
 
     LOGINIT(); 
     switch (log_type) {
-        case LogType::Trace:
+        case LogType::TRACE:
              LOG_LEVEL_TRACE;
+             INFO( "Log Level: LOG_LEVEL_TRACE" );
              break;
-        case LogType::Debug:
+        case LogType::DEBUG:
              LOG_LEVEL_DEBUG;
+             INFO( "Log Level: LOG_LEVEL_DEBUG" );
              break;
-        case LogType::Info:
+        case LogType::INFO:
              LOG_LEVEL_INFO;
+             INFO( "Log Level: LOG_LEVEL_INFO" );
              break;
-        case LogType::Warn:
+        case LogType::WARN:
              LOG_LEVEL_WARN;
+              WARN( "Log Level: LOG_LEVEL_WARN" );
              break;
-        case LogType::Error:
+        case LogType::ERROR:
              LOG_LEVEL_ERROR;
+             ERROR( "Log Level: LOG_LEVEL_ERROR" );
              break;
-        case LogType::Critical:
+        case LogType::CRITICAL:
              LOG_LEVEL_CRITICAL;
+             CRITICAL( "Log Level: LOG_LEVEL_CRITICAL" );
              break;
         default:
             exit( 1 );      

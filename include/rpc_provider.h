@@ -31,13 +31,13 @@ private:
 
     std::unordered_map< std::string, ServiceInfo > m_service_map;  // 已注册的所有服务
 
-    void OnConnction( const muduo::net::TcpConnectionPtr& ); // 连接到来或者断开时调用的回调
+    void OnConnection( const muduo::net::TcpConnectionPtr& ); // 连接到来或者断开时调用的回调
     void OnMessage( const muduo::net::TcpConnectionPtr&,
                     muduo::net::Buffer*, 
                     muduo::Timestamp ); // 读事件到来时触发的回调
 
     // Closure 的回调操作，用于序列化RPC和网络传输（发送）
-    void SendRPCResponse( const muduo::net::TcpConnectionPtr&,
+    void SendResponse( const muduo::net::TcpConnectionPtr&,
                           google::protobuf::Message* ); 
 
 

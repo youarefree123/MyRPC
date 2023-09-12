@@ -4,7 +4,7 @@
 
 
 int main() {
-    LogInit(PutType::Console, LogType::Info);
+    LogInit(PutType::Console, LogType::INFO);
     mrpc::Config::Instance().Init( "/home/jiangjun/code/MyRPC/config.ini" );
     mrpc::Config::Instance().Format();
 
@@ -45,7 +45,6 @@ int main() {
     uint16_t rpc_port = atoi( check( "rpc_port" ).c_str() );
     // muduo::net::InetAddress addr{ ip, port };
 
-    CRITICAL( "{} {} ", rpc_ip, rpc_port );
 
     rpc_ip = check( "ip" );
 
