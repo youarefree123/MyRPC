@@ -2,7 +2,7 @@ syntax = 'proto3';
 
 package mrpc;
 
-message RPCHeader
+message RpcHeader
 {
     bytes service_name = 1;
     bytes method_name = 2;

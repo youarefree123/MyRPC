@@ -33,11 +33,11 @@ public:
     Logger( const Logger& ) = delete;
     Logger& operator= ( const Logger& ) = delete;
     static Logger& Instance();
-    bool init(const std::string& filePath = "./logs/log", 
+    inline bool init(const std::string& filePath = "./logs/log", 
             const std::string& loggerName = "Logger",
             spdlog::level::level_enum level = spdlog::level::info);
 
-    void setLevel(spdlog::level::level_enum level = spdlog::level::info);
+    inline void setLevel(spdlog::level::level_enum level = spdlog::level::info);
     static void onlyToConsole() { writeToFile_ = false; }
     static void onlyToFile() { writeToConsole_ = false; }
     static void shutdown() { spdlog::shutdown(); };
@@ -150,7 +150,7 @@ enum LogType {
     CRITICAL
 };
 
-void LogInit( PutType put_type, LogType log_type ) {
+inline void LogInit( PutType put_type, LogType log_type ) {
 
     switch ( put_type )
     {

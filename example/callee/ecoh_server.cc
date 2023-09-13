@@ -1,7 +1,7 @@
 #include "pingpong.pb.h"
 #include "rpc_provider.h"
-#include "config.h"
 #include "log.h"
+#include "config.h"
 #include <string>
 
 
@@ -21,14 +21,14 @@ public:
     void Echo(::google::protobuf::RpcController* controller,
                        const ::mrpc::EchoRequst* request,
                        ::mrpc::EchoResponse* response,
-                       ::google::protobuf::Closure* done) 
+                       ::google::protobuf::Closure* done) override
     {
         // 解析请求
         std::string msg = request->msg();
 
         // 做本地业务
         std::string ret = Echo( msg );
-
+        
         // 封装响应
         mrpc::ResultCode* code = response->mutable_result_code(); 
         code->set_err_code( 0 );
@@ -42,7 +42,7 @@ public:
     void Hello(::google::protobuf::RpcController* controller,
                         const ::mrpc::HelloRequst* request,
                         ::mrpc::HelloResponse* response,
-                        ::google::protobuf::Closure* done)
+                        ::google::protobuf::Closure* done) override
     {
         // 解析请求
         std::string name = request->name();

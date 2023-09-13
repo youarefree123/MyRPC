@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include "noncopyable.h"
 #include <unordered_map>
@@ -14,14 +14,15 @@ namespace mrpc {
 
 class Config : public noncopyable {
 public:
-    bool Init( const char* ini_path );
-    void Format();
+    // 因为函数定义都放在.h中了，所以要加inline， log.h 同理
+    inline bool Init( const char* ini_path );
+    inline void Format();
     static Config& Instance() {
         static Config conf;
         return conf;
     }
-    std::optional<std::string> Load( const char* ) ;
-    std::optional<std::string> Load( std::string&& );
+    inline std::optional<std::string> Load( const char* ) ;
+    inline std::optional<std::string> Load( std::string&& );
 
 private:
     Config() = default;
@@ -30,7 +31,7 @@ private:
 };
 
 
-bool Config::Init( const char* ini_path ) {
+ bool Config::Init( const char* ini_path ) {
   
     if (!std::filesystem::exists(ini_path)) {
         return false;
@@ -45,7 +46,7 @@ bool Config::Init( const char* ini_path ) {
         m_config[ it.first ] = it.second.data();
     }
 
-    Format();
+    // Format();
 
     return true;
     

@@ -1,7 +1,7 @@
 #include "rpc_provider.h"
+#include "rpc_header.pb.h"
 #include "log.h"
 #include "config.h"
-#include "rpc_header.pb.h"
 #include <muduo/net/TcpServer.h>
 
 namespace mrpc {
@@ -36,7 +36,7 @@ void RPCProvider::NotifyService( google::protobuf::Service* service ) {
 // 循环等待，提供远程调用服务
 void RPCProvider::Run() {
 
-    auto check = [&]( const char* key ) -> std::string {
+    auto SafeLoad = [&]( const char* key ) -> std::string {
         std::optional<std::string> opt = Config::Instance().Load( key );
         if( !opt ) {
             CRITICAL( "{} is Not Config.", key );
@@ -45,8 +45,8 @@ void RPCProvider::Run() {
     };
 
     // 设置 ip 端口
-    std::string rpc_ip = check( "rpc_ip" );
-    uint16_t rpc_port = atoi( check( "rpc_port" ).c_str() );
+    std::string rpc_ip = SafeLoad( "rpc_ip" );
+    uint16_t rpc_port = atoi( SafeLoad( "rpc_port" ).c_str() );
     muduo::net::InetAddress addr{ rpc_ip, rpc_port };
 
     muduo::net::TcpServer server( &m_event_loop, addr, "RPCProvider" );
@@ -59,7 +59,7 @@ void RPCProvider::Run() {
                                         std::placeholders::_3 )  );
 
     // 设置线程数
-    int num_thread = atoi( check( "num_thread" ).c_str() );
+    int num_thread = atoi( SafeLoad( "num_thread" ).c_str() );
     server.setThreadNum( num_thread );
 
     INFO( "RPC Server {} start.", server.name() );
@@ -89,7 +89,7 @@ void RPCProvider::OnMessage( const muduo::net::TcpConnectionPtr& conn,
     std::string rpc_head_str = buf->retrieveAsString( header_size );
     std::string service_name, method_name;
     int32_t args_size; 
-    RPCHeader rpc_header; 
+    RpcHeader rpc_header; 
     
     if( rpc_header.ParseFromString( rpc_head_str ) ) {
         service_name = rpc_header.service_name();
@@ -130,7 +130,7 @@ void RPCProvider::OnMessage( const muduo::net::TcpConnectionPtr& conn,
     // 封装请求 和 应答
     google::protobuf::Message* request = service->GetRequestPrototype( method ).New();
     if( !request->ParseFromString( args_str ) ) {
-        CRITICAL( "request args parse failed!, content = {}.", args_str );
+        CRITICAL( "request args_str parse failed!, content = {}.", args_str );
     }
 
     google::protobuf::Message* response = service->GetResponsePrototype( method ).New();
@@ -157,6 +157,8 @@ void RPCProvider::SendResponse( const muduo::net::TcpConnectionPtr& conn, google
     if( !response->SerializeToString( &response_str ) ) {
         CRITICAL( "SerializeToString failed, {}.",response_str );
     }
+
+    // response->PrintDebugString();
     conn->send( response_str );
     conn->shutdown(); // 模拟短连接，提供一次服务后就主动断开连接 
 }
