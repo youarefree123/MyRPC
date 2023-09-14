@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <string>
 #include <filesystem>
-#include <optional>
 #include <iostream> // fixbug 
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -21,8 +20,8 @@ public:
         static Config conf;
         return conf;
     }
-    inline std::optional<std::string> Load( const char* ) ;
-    inline std::optional<std::string> Load( std::string&& );
+    inline std::string Load( const char* ) ;
+    inline std::string Load( std::string&& );
 
 private:
     Config() = default;
@@ -58,16 +57,20 @@ void Config::Format() {
     }
 }
 
-std::optional<std::string> Config::Load( const char* key ) {
+std::string Config::Load( const char* key ) {
     return Load( std::string(key) );
 }
 
-std::optional<std::string> Config::Load( std::string&& key ) {
+std::string Config::Load( std::string&& key ) {
     if( m_config.find( key ) != m_config.end() ) {
         return m_config[ key ];
     }
-    return std::nullopt;
+    std::cerr<<key<<"is Not Config.\n"; abort();
+    return "";
 }
+
+
+
 
 
 } // mrpc

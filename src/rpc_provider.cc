@@ -1,7 +1,8 @@
 #include "rpc_provider.h"
 #include "rpc_header.pb.h"
-#include "log.h"
 #include "config.h"
+#include "zookeeper_util.h"
+#include "log.h"
 #include <muduo/net/TcpServer.h>
 
 namespace mrpc {
@@ -36,17 +37,9 @@ void RPCProvider::NotifyService( google::protobuf::Service* service ) {
 // 循环等待，提供远程调用服务
 void RPCProvider::Run() {
 
-    auto SafeLoad = [&]( const char* key ) -> std::string {
-        std::optional<std::string> opt = Config::Instance().Load( key );
-        if( !opt ) {
-            CRITICAL( "{} is Not Config.", key );
-        }
-        return opt.value();
-    };
-
     // 设置 ip 端口
-    std::string rpc_ip = SafeLoad( "rpc_ip" );
-    uint16_t rpc_port = atoi( SafeLoad( "rpc_port" ).c_str() );
+    std::string rpc_ip = Config::Instance().Load( "rpc_ip" );
+    uint16_t rpc_port = atoi( Config::Instance().Load( "rpc_port" ).c_str() );
     muduo::net::InetAddress addr{ rpc_ip, rpc_port };
 
     muduo::net::TcpServer server( &m_event_loop, addr, "RPCProvider" );
@@ -59,8 +52,26 @@ void RPCProvider::Run() {
                                         std::placeholders::_3 )  );
 
     // 设置线程数
-    int num_thread = atoi( SafeLoad( "num_thread" ).c_str() );
+    int num_thread = atoi(  mrpc::Config::Instance().Load( "num_thread" ).c_str() );
     server.setThreadNum( num_thread );
+
+    // 将当前所有的RPC服务都发布到zookeeper中
+    ZKClient zclient; 
+    zclient.Start();
+    // service 是永久节点， method 是临时节点
+    for( auto& [ service_name, service ] : m_service_map ) {
+        std::string service_path = "/" + service_name; 
+        zclient.Create( service_path.c_str(), nullptr, 0, 0 ); // 服务节点是永久节点
+        for( auto& [ method_name, method ] : service.m_method_map ) {
+            std::string method_path = service_path + "/" + method_name;  // 存储真正调用的方法的ip:port
+            char method_data[128];
+            sprintf( method_data, "%s:%d", rpc_ip.c_str(), rpc_port );
+
+            INFO( "register method : {} -- {}",method_path,method_data  );
+            zclient.Create( method_path.c_str(), method_data, strlen( method_data ), ZOO_EPHEMERAL ); // 建立一个临时节点
+        }
+    }
+
 
     INFO( "RPC Server {} start.", server.name() );
     server.start();

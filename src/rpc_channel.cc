@@ -3,6 +3,7 @@
 #include "config.h"
 #include <iostream>
 #include <string>
+#include "zookeeper_util.h"
 #include <muduo/net/Buffer.h>
 #include <muduo/net/InetAddress.h>
 #include <sys/types.h>          /* See NOTES */
@@ -73,18 +74,38 @@ void MRpcChannel::CallMethod(   const google::protobuf::MethodDescriptor* method
     
 
 
-    auto SafeLoad = [&]( const char* key ) -> std::string {
-        std::optional<std::string> opt = Config::Instance().Load( key );
-        if( !opt ) {
-            std::cout<<key<<"  is Not Config.\n";
-            exit(1);
-        }
-        return opt.value();
-    };
+    // auto SafeLoad = [&]( const char* key ) -> std::string {
+    //     std::optional<std::string> opt = Config::Instance().Load( key );
+    //     if( !opt ) {
+    //         std::cout<<key<<"  is Not Config.\n";
+    //         exit(1);
+    //     }
+    //     return opt.value();
+    // };
 
-    std::string rpc_ip = SafeLoad( "rpc_ip" );
-    uint16_t rpc_port = atoi( SafeLoad( "rpc_port" ).c_str() );
+
+    // 服务发现： 从zookeeper中查找所调用的服务
+    ZKClient zclient; 
+    zclient.Start();
+    std::stringstream ss;
+    ss << "/" << service_name << "/" << method_name;
+    std::string method_path = std::move(ss).str();
     
+    std::optional<std::string> ip_port = zclient.GetData( ( method_path.c_str() ) );
+    if( ip_port == std::nullopt ) {
+        std::cerr<<method_path<<" is not exist."<<std::endl;
+        exit(1);
+    }
+    int idx = ip_port.value().find( ":" );
+    if( idx == -1 ) {
+        std::cerr<<ip_port.value()<<" is illegal."<<std::endl;
+        exit(1); 
+    }
+
+    std::string rpc_ip = ip_port.value().substr( 0, idx );
+    uint16_t rpc_port = atoi( ip_port.value().substr( idx + 1, ip_port.value().size() - idx ).c_str() );
+    
+    std::cout<<method_path<<" --- "<<rpc_ip<<":"<<rpc_port<<std::endl;
 
     // FIXME ： 先本地找服务，后面再加服务发现
     muduo::net::InetAddress addr{ rpc_ip, rpc_port };

@@ -27,6 +27,7 @@ target_link_libraries(
   muduo_net
   muduo_base
   pthread
+  zookeeper_mt
 ) 
 
 
